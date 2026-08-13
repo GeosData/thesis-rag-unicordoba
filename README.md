@@ -7,7 +7,7 @@ Servicio RAG sobre el corpus de tesis de Ingeniería de Sistemas de la Universid
 
 ## Estado
 
-`discovery` — docs-first completo (00→04). Stack lockeado en [`docs/04-decisiones.md`](docs/04-decisiones.md). Falta implementación.
+`discovery + plan` — docs-first completo (00→04) y plan de implementación incremental en [`docs/05-plan-implementacion.md`](docs/05-plan-implementacion.md) (cada incremento = un módulo de `jotive.dev/learn` sobre el corpus real). Próximo: **Inc 0 — scaffold por capas + /health**.
 
 ## Stack (lockeado)
 
