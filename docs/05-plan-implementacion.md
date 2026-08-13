@@ -48,8 +48,9 @@
 **Construir:** set de eval con RAGAS (faithfulness + context precision) que gatea; tracing Langfuse en el grafo.
 **Salida verificable:** score RAGAS baseline registrado, traces visibles en Langfuse, el eval corre como gate (regression gate).
 
-## Inc 6 — Testing + CI
+## Inc 6 — Testing + CI ✅ HECHO
 **Módulo ruta:** M1 (pytest) + D7.
+**Estado:** `api/tests/` con 11 tests verdes — unit puros (`chunk_text`, `build_document`, `grade`, `route`) + API (`/health` 200, `/ask` valida 422 sin question). Workflow `.github/workflows/ci.yml` (uv + pytest) listo; correrá al pushear el repo (D9, pendiente fijar nombre). Los unit no dependen de secrets → verdes en CI sin credenciales.
 **Gap:** testing/CI (default senior, gap EPAM).
 **Construir:** pytest unit (chunking, grading) + integration (retrieval sobre DB de test) + API (`/ask`, `/health`); GitHub Actions.
 **Salida verificable:** CI verde, caminos críticos cubiertos, PR no mergeable con CI roja.
