@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>scholar-rag · panel</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14110e; --panel:#1c1813; --line:#2e2820; --ink:#efe7d8;
+    --muted:#a79b86; --accent:#e0a44a; --ok:#7fb96e; --no:#c9705a;
+    --serif:"Fraunces",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#241d15,var(--bg));
+    color:var(--ink);font-family:var(--serif);line-height:1.5;min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:56px 22px 96px}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:clamp(26px,5vw,38px);font-weight:600;margin:8px 0 0;letter-spacing:-.02em}
+  a.home{font-family:var(--mono);font-size:13px;color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--muted)}
+  a.home:hover{color:var(--accent);border-color:var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:30px 0 8px}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .tile .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .tile .val{font-size:40px;font-weight:600;letter-spacing:-.02em;margin-top:8px}
+  .tile.no .val{color:var(--no)}
+  .tile.ok .val{color:var(--ok)}
+  .bar{height:8px;border-radius:999px;background:#ffffff10;overflow:hidden;margin:24px 0 4px}
+  .bar > span{display:block;height:100%;background:var(--ok);width:0;transition:width .5s ease}
+  .barlbl{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  h2{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    margin:38px 0 12px;font-weight:500}
+  .q{display:flex;align-items:flex-start;gap:12px;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;margin-bottom:8px}
+  .q.gap{border-color:#c9705a55;background:#c9705a10}
+  .dot{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.06em;padding:3px 8px;border-radius:999px;flex:none;margin-top:2px}
+  .dot.ok{background:#7fb96e22;color:var(--ok)} .dot.no{background:#c9705a22;color:var(--no)}
+  .qt{font-size:16px}
+  .qm{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .empty,.err{font-family:var(--mono);font-size:13px;color:var(--muted);margin-top:20px}
+  .foot{margin-top:36px;font-family:var(--mono);font-size:12px;color:#6f6555}
+  .spin{width:16px;height:16px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;
+    display:inline-block;animation:sp .7s linear infinite;vertical-align:-3px;margin-right:8px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <div>
+      <div class="kicker">scholar-rag · panel</div>
+      <h1>Uso del lab</h1>
+    </div>
+    <a class="home" href="/">← volver al buscador</a>
+  </div>
+
+  <div id="content"><p class="empty"><span class="spin"></span>cargando métricas…</p></div>
+
+  <p class="foot">datos de <code>/stats</code> · las preguntas sin evidencia señalan dónde el corpus se queda corto</p>
+</main>
+
+<script>
+  const API="https://scholar-rag-api-448285277410.us-east1.run.app";
+  const content=document.getElementById("content");
+  const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const fmtDate=iso=>{try{return new Date(iso).toLocaleString("es-CO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}catch(e){return iso}};
+
+  async function load(){
+    try{
+      const r=await fetch(API+"/stats"); if(!r.ok) throw new Error("HTTP "+r.status);
+      const d=await r.json();
+      const rate=Math.round((d.grounded_rate||0)*100);
+      const noEvi=(d.total_questions||0)-(d.grounded||0);
+      let html=`
+        <div class="grid">
+          <div class="tile"><div class="lbl">Preguntas</div><div class="val">${d.total_questions}</div></div>
+          <div class="tile ok"><div class="lbl">Con evidencia</div><div class="val">${rate}%</div></div>
+          <div class="tile no"><div class="lbl">Sin evidencia</div><div class="val">${noEvi}</div></div>
+        </div>
+        <div class="bar"><span style="width:${rate}%"></span></div>
+        <div class="barlbl">${d.grounded} de ${d.total_questions} respondidas con fuente del corpus</div>
+        <h2>Últimas preguntas</h2>`;
+      if(!d.recent || !d.recent.length){
+        html+=`<p class="empty">todavía no hay preguntas registradas</p>`;
+      }else{
+        html+=d.recent.map(q=>`
+          <div class="q ${q.grounded?"":"gap"}">
+            <span class="dot ${q.grounded?"ok":"no"}">${q.grounded?"FUENTE":"SIN EVID"}</span>
+            <div><div class="qt">${esc(q.question)}</div><div class="qm">${fmtDate(q.created_at)}</div></div>
+          </div>`).join("");
+      }
+      content.innerHTML=html;
+    }catch(e){
+      content.innerHTML=`<p class="err">no se pudo cargar el panel (${esc(e.message)}). el api puede estar despertando, recargá en unos segundos.</p>`;
+    }
+  }
+  load();
+</script>
+</body>
+</html>
