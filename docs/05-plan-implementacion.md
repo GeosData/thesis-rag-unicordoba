@@ -15,8 +15,9 @@
 **Construir:** estructura `config / routes / controllers / services / repositories / middleware`, bootstrap separado de la lógica, `Settings` Pydantic (env: Neon URL, LLM keys), endpoint `/health`, conexión a Neon verificada.
 **Salida verificable:** `uvicorn` levanta, `GET /health` responde 200 con estado de DB, capas vacías pero cableadas.
 
-## Inc 1 — Ingesta del corpus (RAG core)
+## Inc 1 — Ingesta del corpus (RAG core) ✅ HECHO
 **Módulo ruta:** A1 (chunking, embeddings, pgvector).
+**Estado:** DB `scholar_rag` en Neon (proyecto geosdata-platform) con pgvector + índice HNSW cosine. Tablas `thesis` (metadata) + `chunk` (contenido + `vector(384)`). Pipeline `scripts/ingest.py` (un comando: `uv run python -m scripts.ingest`) lee el corpus, chunkea (title+keywords+abstract), embeddings locales fastembed (`paraphrase-multilingual-MiniLM-L12-v2`, sin API key), upsert idempotente. **271 tesis → 575 chunks indexados.** Búsqueda semántica verificada con `scripts/search.py` (retrieval relevante: "riego automatizado" → tesis de riego por goteo). Pendiente futuro: full-text del PDF (hoy solo abstract) + re-bajar corpus con encoding limpio.
 **Gap:** RAG + vector DB (máxima demanda de mercado).
 **Construir:** pipeline reproducible (un comando) que reusa `dump_unicordoba.py` → metadata + PDF vía API DSpace → extrae texto → chunkea con metadata de origen (tesis, autor, año, sección) → embeddings → `pgvector`. Tablas: `thesis` (metadata) + `chunk` (texto + embedding + FK a thesis).
 **Salida verificable:** comando único indexa las 271 tesis; retrieval top-k por consola devuelve chunks con su origen trazable.

@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     app_name: str = "scholar-rag"
     environment: str = "development"
     database_url: str | None = None
+    corpus_path: str = ""
+    embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 
 @lru_cache

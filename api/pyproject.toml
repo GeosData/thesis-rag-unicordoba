@@ -8,6 +8,8 @@ dependencies = [
     "uvicorn[standard]>=0.34",
     "pydantic-settings>=2.7",
     "asyncpg>=0.30",
+    "pgvector>=0.3",
+    "fastembed>=0.4",
 ]
 
 [dependency-groups]
