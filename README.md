@@ -7,7 +7,7 @@ Servicio RAG sobre el corpus de tesis de Ingeniería de Sistemas de la Universid
 
 ## Estado
 
-`implementacion` — docs-first (00→04) + plan incremental en [`docs/05-plan-implementacion.md`](docs/05-plan-implementacion.md). **Inc 0-1 + 3 hechos:** scaffold FastAPI por capas + `/health`; ingesta RAG (271 tesis → 575 chunks en Neon+pgvector); **agente LangGraph** (retrieve→grade→generate con citas trazables / fallback sin alucinar, LLM Groq). **VIVO end-to-end** 🟢 — web **https://scholar-rag.pages.dev** → api **https://scholar-rag-api-448285277410.us-east1.run.app** (Cloud Run + Neon+pgvector + LangGraph). Pendiente: dominio propio + analytics (medir si crece), Inc 2 (retrieval de calidad), Inc 5 (evals), Inc 6 (tests/CI).
+`implementacion` — docs-first (00→04) + plan incremental en [`docs/05-plan-implementacion.md`](docs/05-plan-implementacion.md). **Inc 0-1 + 3 hechos:** scaffold FastAPI por capas + `/health`; ingesta RAG (271 tesis → 575 chunks en Neon+pgvector); **agente LangGraph** (retrieve→grade→generate con citas trazables / fallback sin alucinar, LLM Groq). **VIVO end-to-end** 🟢 — web **https://scholar-rag.pages.dev** → api **https://scholar-rag-api-448285277410.us-east1.run.app** (Cloud Run + Neon+pgvector + LangGraph). **Analytics de producto:** cada pregunta se registra (tabla `query_log`), métricas en `GET /stats` (total, % con evidencia, últimas preguntas). Pendiente: web analytics CF (1 toggle), dominio propio, Inc 2 (retrieval), Inc 5 (evals), Inc 6 (tests/CI).
 
 ### Correr (local)
 ```
