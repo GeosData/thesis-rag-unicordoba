@@ -7,14 +7,15 @@ Servicio RAG sobre el corpus de tesis de Ingeniería de Sistemas de la Universid
 
 ## Estado
 
-`implementacion` — docs-first (00→04) + plan incremental en [`docs/05-plan-implementacion.md`](docs/05-plan-implementacion.md). **Inc 0-1 hechos:** scaffold FastAPI por capas + `/health`; ingesta RAG (271 tesis → 575 chunks en Neon+pgvector) con búsqueda semántica verificada. Próximo: **Inc 2 — retrieval de calidad** (reranking / hybrid).
+`implementacion` — docs-first (00→04) + plan incremental en [`docs/05-plan-implementacion.md`](docs/05-plan-implementacion.md). **Inc 0-1 + 3 hechos:** scaffold FastAPI por capas + `/health`; ingesta RAG (271 tesis → 575 chunks en Neon+pgvector); **agente LangGraph** (retrieve→grade→generate con citas trazables / fallback sin alucinar, LLM Groq). Próximo: **Inc 4 — exponer `/ask` por HTTP**. Pendiente: Inc 2 (retrieval de calidad, reranking).
 
 ### Correr (local)
 ```
 cd api && uv sync
 cp .env.example .env   # y completar DATABASE_URL (Neon) + CORPUS_PATH
 uv run python -m scripts.ingest              # indexa el corpus
-uv run python -m scripts.search "tu pregunta"  # busca en el corpus
+uv run python -m scripts.search "tu pregunta"  # busca chunks en el corpus
+uv run python -m scripts.ask "tu pregunta"     # respuesta del agente con citas
 uv run uvicorn app.main:app --reload         # levanta el api
 ```
 

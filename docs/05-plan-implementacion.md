@@ -28,8 +28,9 @@
 **Construir:** sobre el retrieval base, hybrid search + reranking + filtrado por metadata (año/sección).
 **Salida verificable:** para 5 preguntas de prueba, los chunks recuperados son relevantes y cada uno arrastra su cita de origen.
 
-## Inc 3 — Grafo LangGraph (el corazón)
+## Inc 3 — Grafo LangGraph (el corazón) ✅ HECHO
 **Módulo ruta:** A3 (StateGraph, conditional edges, límite de pasos) + A0 (structured output para citas).
+**Estado:** grafo `retrieve → grade → (generate | fallback)` en `app/services/rag_graph.py`. LLM = Groq `llama-3.3-70b-versatile` (`with_structured_output` sobre schema `Answer`+`Citation`, temperature 0). `grade` usa umbral de score coseno (`relevance_min_score=0.35`): si el top chunk no llega, ruta a `fallback` honesto y NO alucina. Verificado con `scripts/ask.py`: pregunta del corpus → respuesta sintetizada de 2 tesis reales con citas trazables (handle exacto); "capital de Francia" → fallback. **Nota:** se saltó el Inc 2 (retrieval de calidad) para llegar antes al corazón; queda pendiente como mejora (reranking/hybrid).
 **Gap:** agentic/LangGraph (gap #1 de demanda) + LLM apps prod.
 **Construir:** grafo `retrieve → grade relevancia → generate → forzar citas (structured output) → fallback`. Si no hay contexto suficiente responde "no encontré evidencia" (no alucina). Estado tipado, END sentinel real, límite de pasos.
 **Salida verificable:** el grafo responde una pregunta con citas trazables (tesis + sección enlazada a DSpace) o el fallback honesto; se puede explicar por qué es grafo y no cadena.

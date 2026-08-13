@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     database_url: str | None = None
     corpus_path: str = ""
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    groq_api_key: str | None = None
+    groq_model: str = "llama-3.3-70b-versatile"
+    retrieval_top_k: int = 5
+    relevance_min_score: float = 0.35
 
 
 @lru_cache
