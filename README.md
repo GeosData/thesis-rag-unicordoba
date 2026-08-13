@@ -7,7 +7,12 @@ Servicio RAG sobre el corpus de tesis de Ingeniería de Sistemas de la Universid
 
 ## Estado
 
-`discovery + plan` — docs-first completo (00→04) y plan de implementación incremental en [`docs/05-plan-implementacion.md`](docs/05-plan-implementacion.md) (cada incremento = un módulo de `jotive.dev/learn` sobre el corpus real). Próximo: **Inc 0 — scaffold por capas + /health**.
+`implementacion` — docs-first (00→04) + plan incremental en [`docs/05-plan-implementacion.md`](docs/05-plan-implementacion.md). **Inc 0 hecho:** scaffold FastAPI por capas + `/health` (verificado 200). Próximo: **Inc 1 — ingesta RAG core** (chunking + embeddings + pgvector sobre el corpus).
+
+### Correr el api (local)
+```
+cd api && uv sync && uv run uvicorn app.main:app --reload
+```
 
 ## Stack (lockeado)
 

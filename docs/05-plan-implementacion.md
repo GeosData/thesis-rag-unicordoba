@@ -8,8 +8,9 @@
 
 ---
 
-## Inc 0 — Scaffold + config por capas
+## Inc 0 — Scaffold + config por capas ✅ HECHO
 **Módulo ruta:** A0 (build step FastAPI) + arquitectura por capas (D6, ref `api-newsletter`).
+**Estado:** `api/app/` con las 6 capas cableadas (config/routes/controllers/services/repositories/middleware), `Settings` pydantic-settings, pool asyncpg lazy, `GET /health` atraviesa las capas y responde 200 (`database: not_configured` sin `DATABASE_URL`, `up`/`down` con Neon). Dockerfile uv. Verificado con TestClient.
 **Gap que cierra:** arquitectura/SOLID (razón rechazo EPAM) + FastAPI/Pydantic.
 **Construir:** estructura `config / routes / controllers / services / repositories / middleware`, bootstrap separado de la lógica, `Settings` Pydantic (env: Neon URL, LLM keys), endpoint `/health`, conexión a Neon verificada.
 **Salida verificable:** `uvicorn` levanta, `GET /health` responde 200 con estado de DB, capas vacías pero cableadas.
