@@ -22,14 +22,17 @@ class RagState(TypedDict):
 async def retrieve(state: RagState) -> dict:
     settings = get_settings()
     vector = embeddings.embed_query(state["question"])
-    contexts = await retrieval_repository.search(vector, settings.retrieval_top_k)
+    contexts = await retrieval_repository.hybrid_search(
+        state["question"], vector, settings.retrieval_top_k
+    )
     return {"contexts": contexts}
 
 
 def grade(state: RagState) -> dict:
     settings = get_settings()
     contexts = state["contexts"]
-    grounded = bool(contexts) and contexts[0]["score"] >= settings.relevance_min_score
+    best_cosine = max((context.get("cosine", 0.0) for context in contexts), default=0.0)
+    grounded = best_cosine >= settings.relevance_min_score
     return {"grounded": grounded}
 
 

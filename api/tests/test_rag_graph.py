@@ -1,13 +1,18 @@
 from app.services.rag_graph import grade, route
 
 
-def test_grade_grounded_when_top_score_high():
-    state = {"contexts": [{"score": 0.9}, {"score": 0.4}]}
+def test_grade_grounded_when_cosine_high():
+    state = {"contexts": [{"cosine": 0.9}, {"cosine": 0.4}]}
     assert grade(state)["grounded"] is True
 
 
-def test_grade_not_grounded_when_top_score_low():
-    state = {"contexts": [{"score": 0.1}]}
+def test_grade_grounded_uses_best_not_first():
+    state = {"contexts": [{"cosine": 0.2}, {"cosine": 0.8}]}
+    assert grade(state)["grounded"] is True
+
+
+def test_grade_not_grounded_when_all_low():
+    state = {"contexts": [{"cosine": 0.1}, {"cosine": 0.05}]}
     assert grade(state)["grounded"] is False
 
 

@@ -22,8 +22,9 @@
 **Construir:** pipeline reproducible (un comando) que reusa `dump_unicordoba.py` → metadata + PDF vía API DSpace → extrae texto → chunkea con metadata de origen (tesis, autor, año, sección) → embeddings → `pgvector`. Tablas: `thesis` (metadata) + `chunk` (texto + embedding + FK a thesis).
 **Salida verificable:** comando único indexa las 271 tesis; retrieval top-k por consola devuelve chunks con su origen trazable.
 
-## Inc 2 — Retrieval de calidad
+## Inc 2 — Retrieval de calidad ✅ HECHO (hybrid)
 **Módulo ruta:** A2 (reranking, hybrid search RRF, metadata filtering).
+**Estado:** **hybrid search** en `retrieval_repository.hybrid_search` — fusiona vector (pgvector coseno) + full-text léxico (`tsvector` español, `websearch_to_tsquery`) con **RRF** (Reciprocal Rank Fusion, k=60) sobre un pool de 20. Columna `chunk.tsv` generada + índice GIN. `grade` ahora evalúa la mejor similitud coseno del set (el RRF reordena pero no está en escala 0-1). Sin modelo extra ni peso en Cloud Run. Verificado: corpus sigue fundado, off-domain sigue en fallback, 12 tests verdes. Reranking con cross-encoder = mejora opcional futura (agrega modelo).
 **Gap:** RAG avanzado.
 **Construir:** sobre el retrieval base, hybrid search + reranking + filtrado por metadata (año/sección).
 **Salida verificable:** para 5 preguntas de prueba, los chunks recuperados son relevantes y cada uno arrastra su cita de origen.

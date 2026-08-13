@@ -11,7 +11,7 @@
 | **Chunking** | Por caracteres, `size=1000`, `overlap=150`. La mayoría de abstracts = 1 chunk | `corpus.py` → `chunk_text`. 271 tesis → **575 chunks** |
 | **Embeddings** | `paraphrase-multilingual-MiniLM-L12-v2` vía **fastembed local** (sin API key), **384 dim**, multilingüe ES | `api/app/services/embeddings.py` |
 | **Vector store** | **pgvector en Postgres/Neon** (no vector DB aparte). Tabla `chunk (embedding vector(384))` + índice **HNSW `vector_cosine_ops`** | Neon `scholar_rag`; schema en el Inc 1 |
-| **Retrieval** | top-k (`k=5`) por distancia coseno `<=>`, sin reranking ni hybrid | `api/app/repositories/retrieval_repository.py` |
+| **Retrieval** | **hybrid**: vector (coseno pgvector) + léxico (`tsvector` español) fusionados con RRF (pool 20 → top-5). Reranking cross-encoder = pendiente opcional | `api/app/repositories/retrieval_repository.py` → `hybrid_search` |
 | **Grade** | Umbral de score coseno (`relevance_min_score=0.35`); si el top no llega → fallback honesto | `api/app/services/rag_graph.py` |
 
 ## Cómo mejorar (roadmap, mayor impacto primero)
