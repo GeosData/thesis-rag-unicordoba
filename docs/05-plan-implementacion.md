@@ -54,8 +54,9 @@
 **Construir:** pytest unit (chunking, grading) + integration (retrieval sobre DB de test) + API (`/ask`, `/health`); GitHub Actions.
 **Salida verificable:** CI verde, caminos críticos cubiertos, PR no mergeable con CI roja.
 
-## Inc 7 — Web
+## Inc 7 — Web ✅ HECHO
 **Módulo ruta:** front (skills de diseño, sin look IA-default).
+**Estado:** `web/index.html` autocontenido (identidad propia: papel oscuro cálido + ámbar + serif Fraunces + mono, iconos SVG línea) consume `POST /ask`, muestra respuesta + bandera fundado/sin-evidencia + citas como tarjetas enlazadas a la tesis en DSpace. Estados loading/error/fallback. **Desplegada viva: https://scholar-rag.pages.dev** (CF Pages proyecto `scholar-rag`, deploy `wrangler pages deploy web --project-name scholar-rag`).
 **Gap:** entrega completa punta a punta (no "MVP mínimo").
 **Construir:** página que consume `/ask`, muestra respuesta + citas enlazadas a la tesis en DSpace. Identidad propia, iconos, no UI plana.
 **Salida verificable:** la web corre local consumiendo la API, respuesta + citas navegables.
