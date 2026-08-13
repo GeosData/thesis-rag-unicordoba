@@ -9,7 +9,10 @@ from app.config.settings import get_settings
 
 @lru_cache
 def _model() -> TextEmbedding:
-    return TextEmbedding(get_settings().embedding_model)
+    settings = get_settings()
+    if settings.fastembed_cache:
+        return TextEmbedding(settings.embedding_model, cache_dir=settings.fastembed_cache)
+    return TextEmbedding(settings.embedding_model)
 
 
 def embed_passages(texts: list[str]) -> list[list[float]]:

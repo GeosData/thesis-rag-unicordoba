@@ -60,8 +60,9 @@
 **Construir:** página que consume `/ask`, muestra respuesta + citas enlazadas a la tesis en DSpace. Identidad propia, iconos, no UI plana.
 **Salida verificable:** la web corre local consumiendo la API, respuesta + citas navegables.
 
-## Inc 8 — Deploy (terminado v1)
-**Módulo ruta:** A6 + paved-road deploy (D8).
+## Inc 8 — Deploy (terminado v1) — API ✅ VIVA, falta web+dominio
+**API en producción:** `https://scholar-rag-api-448285277410.us-east1.run.app` (Cloud Run, proyecto geosdata, region us-east1, allow-unauthenticated). Deploy `gcloud run deploy scholar-rag-api --source . --env-vars-file .env.deploy.yaml` (secrets vía env-vars-file gitignored; mover a Secret Manager es mejora). `fastembed_cache=/tmp/fastembed` por el FS read-only. Verificado: `/health` db up, `POST /ask` responde fundado con citas. **Falta:** web (Inc 7) + dominio + analytics.
+**Módulo ruta original:** A6 + paved-road deploy (D8).
 **Gap:** deploy real con dominio.
 **Construir:** api → Cloud Run + Neon; web → Cloudflare Pages; dominio; ADR final de región/costos.
 **Salida verificable (= definición de terminado v1 de [`03-alcance.md`](03-alcance.md)):** deploy vivo respondiendo preguntas reales del corpus con citas correctas, CI verde, RAGAS baseline registrado, README + handbook + ADR contables en entrevista sin abrir el código.
