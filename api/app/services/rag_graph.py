@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import TypedDict
 
 from langgraph.graph import END, StateGraph
@@ -76,3 +77,8 @@ def build_graph():
     graph.add_edge("generate", END)
     graph.add_edge("fallback", END)
     return graph.compile()
+
+
+@lru_cache
+def get_graph():
+    return build_graph()

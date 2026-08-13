@@ -7,7 +7,7 @@ Servicio RAG sobre el corpus de tesis de Ingeniería de Sistemas de la Universid
 
 ## Estado
 
-`implementacion` — docs-first (00→04) + plan incremental en [`docs/05-plan-implementacion.md`](docs/05-plan-implementacion.md). **Inc 0-1 + 3 hechos:** scaffold FastAPI por capas + `/health`; ingesta RAG (271 tesis → 575 chunks en Neon+pgvector); **agente LangGraph** (retrieve→grade→generate con citas trazables / fallback sin alucinar, LLM Groq). Próximo: **Inc 4 — exponer `/ask` por HTTP**. Pendiente: Inc 2 (retrieval de calidad, reranking).
+`implementacion` — docs-first (00→04) + plan incremental en [`docs/05-plan-implementacion.md`](docs/05-plan-implementacion.md). **Inc 0-1 + 3 hechos:** scaffold FastAPI por capas + `/health`; ingesta RAG (271 tesis → 575 chunks en Neon+pgvector); **agente LangGraph** (retrieve→grade→generate con citas trazables / fallback sin alucinar, LLM Groq). **Inc 4 hecho:** `POST /ask` por HTTP (rate-limit + CORS). Próximo: **Inc 7 web + Inc 8 deploy** (dejarlo vivo). Pendiente: Inc 2 (retrieval de calidad), Inc 5 (evals), Inc 6 (tests/CI).
 
 ### Correr (local)
 ```

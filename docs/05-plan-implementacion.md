@@ -35,8 +35,9 @@
 **Construir:** grafo `retrieve → grade relevancia → generate → forzar citas (structured output) → fallback`. Si no hay contexto suficiente responde "no encontré evidencia" (no alucina). Estado tipado, END sentinel real, límite de pasos.
 **Salida verificable:** el grafo responde una pregunta con citas trazables (tesis + sección enlazada a DSpace) o el fallback honesto; se puede explicar por qué es grafo y no cadena.
 
-## Inc 4 — API /ask
+## Inc 4 — API /ask ✅ HECHO
 **Módulo ruta:** A6 (FastAPI async, guardrails, rate-limit).
+**Estado:** `POST /ask` (Pydantic `AskRequest`/`AskResponse`) invoca el grafo compilado una vez (`get_graph` lru_cache), rate-limit slowapi 10/min por IP, CORS abierto para la web. Verificado por HTTP con TestClient: 200 + respuesta fundada con cita. `/health` da `database: up` con el pool vivo.
 **Gap:** producción AI.
 **Construir:** endpoint `/ask` público con rate-limit, I/O Pydantic tipado, integra el grafo del Inc 3 por las capas del Inc 0.
 **Salida verificable:** `POST /ask` con una pregunta real devuelve respuesta + lista de citas por HTTP, con rate-limit activo.
