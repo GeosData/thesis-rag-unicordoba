@@ -2,14 +2,18 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 
 from app.config.settings import get_settings
 
 
 @lru_cache
-def get_llm() -> ChatGroq:
+def get_llm() -> ChatOpenAI:
     settings = get_settings()
-    if not settings.groq_api_key:
-        raise RuntimeError("GROQ_API_KEY is not configured")
-    return ChatGroq(api_key=settings.groq_api_key, model=settings.groq_model, temperature=0)
+    return ChatOpenAI(
+        base_url=settings.gateway_url,
+        api_key="gateway",
+        model=settings.gateway_model,
+        temperature=0,
+        default_headers={"X-Tenant-ID": "thesis-rag"},
+    )

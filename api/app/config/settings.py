@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     fastembed_cache: str | None = None
     groq_api_key: str | None = None
     groq_model: str = "llama-3.3-70b-versatile"
+    gateway_url: str = "https://llm-quota-gateway-448285277410.us-east1.run.app/v1"
+    gateway_model: str = "meta-llama/llama-3.3-70b-instruct"
     retrieval_top_k: int = 5
     relevance_min_score: float = 0.35
 

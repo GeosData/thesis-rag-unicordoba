@@ -53,7 +53,7 @@ async def generate(state: RagState) -> dict:
         f"Contexto:\n{context_block}\n\n"
         f"Pregunta: {state['question']}"
     )
-    structured = llm.get_llm().with_structured_output(Answer)
+    structured = llm.get_llm().with_structured_output(Answer, method="function_calling")
     result: Answer = await structured.ainvoke(prompt)
     return {
         "answer": result.answer,
