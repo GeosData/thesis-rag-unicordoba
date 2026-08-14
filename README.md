@@ -1,4 +1,4 @@
-# scholar-rag *(working name)*
+# thesis-rag-unicordoba
 
 Servicio RAG sobre el corpus de tesis de Ingeniería de Sistemas de la Universidad de Córdoba (~271 tesis, vía API DSpace). Pregunta en lenguaje natural → respuesta sintetizada **con citas trazables** a la tesis y sección de origen.
 
