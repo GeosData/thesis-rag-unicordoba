@@ -4,11 +4,18 @@ from functools import lru_cache
 from typing import TypedDict
 
 from langgraph.graph import END, StateGraph
+from pydantic import BaseModel, Field
 
 from app.config.settings import get_settings
 from app.repositories import retrieval_repository
 from app.schemas.qa import Answer
 from app.services import embeddings, llm
+
+
+class Relevance(BaseModel):
+    relevant: bool = Field(
+        description="true solo si el contexto contiene informacion concreta para responder la pregunta"
+    )
 
 
 class RagState(TypedDict):
@@ -28,12 +35,20 @@ async def retrieve(state: RagState) -> dict:
     return {"contexts": contexts}
 
 
-def grade(state: RagState) -> dict:
-    settings = get_settings()
+async def grade(state: RagState) -> dict:
     contexts = state["contexts"]
-    best_cosine = max((context.get("cosine", 0.0) for context in contexts), default=0.0)
-    grounded = best_cosine >= settings.relevance_min_score
-    return {"grounded": grounded}
+    if not contexts:
+        return {"grounded": False}
+    block = "\n\n".join(f"[{c['handle']}] {c['content'][:600]}" for c in contexts[:5])
+    prompt = (
+        "Decide si el CONTEXTO contiene informacion concreta para responder la PREGUNTA. "
+        "Responde relevant=true solo si al menos un fragmento aporta datos directos sobre lo "
+        "que se pregunta; si el contexto trata de otro tema, responde relevant=false.\n\n"
+        f"PREGUNTA: {state['question']}\n\nCONTEXTO:\n{block}"
+    )
+    judge = llm.get_llm().with_structured_output(Relevance, method="function_calling")
+    verdict: Relevance = await judge.ainvoke(prompt)
+    return {"grounded": verdict.relevant}
 
 
 def route(state: RagState) -> str:

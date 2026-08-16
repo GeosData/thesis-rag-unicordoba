@@ -90,6 +90,22 @@ Nuevo instrumento: `dataset_content.py` (6 preguntas de contenido con el pasaje 
 
 **Fix identificado:** recalibrar el `grade` (el umbral cosine no sirve; probar el score RRF, un margen relativo, o un grade basado en LLM) para atrapar out-of-domain antes de `generate`, en vez de confiar en que el prompt aguante.
 
+## 2026-08-16 — fix del grade node (grade-by-LLM)
+
+Reemplazado el `grade` de umbral cosine por un grade con LLM: le pregunta al modelo si el contexto recuperado realmente responde la pregunta (structured output `Relevance{relevant: bool}`).
+
+Antes/después medido:
+
+| eval                     | antes (cosine 0.35) | después (grade-by-LLM) |
+|--------------------------|---------------------|------------------------|
+| adversarial refusal      | 5/6 = 0.833         | **6/6 = 1.000**        |
+| content hit@3 (in-domain)| 1.000               | 1.000 (sin regresión)  |
+| faithfulness             | 1.000               | 1.000                  |
+
+La alucinación de Marte desapareció (ahora `grounded=False` → fallback). El grade-by-LLM discrimina out-of-domain donde el coseno no podía, y no rechazó ninguna pregunta válida.
+
+**Trade-off honesto:** agrega una llamada LLM por query (el grade ya no es instantáneo). Cada consulta hace ahora 1 llamada (si rechaza) o 2 (grade + generate). Es el costo de la robustez; el impacto en latencia/costo se cuantifica en la pregunta 3 del capstone (pendiente).
+
 ### Pendiente
 2. **Cobertura:** 66% del corpus sin texto. Si importa, evaluar OCR de los PDFs escaneados (costo aparte) o marcar esas tesis como "solo metadata" en la UI.
 3. **Precisión@1:** si el #1 exacto importa para el producto, un reranker (M3) sobre el top-k recuperaría la precisión perdida sin sacrificar el recall de contenido.
