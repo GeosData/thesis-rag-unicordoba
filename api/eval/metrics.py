@@ -1,6 +1,20 @@
 from __future__ import annotations
 
+import unicodedata
 from collections.abc import Iterable
+
+
+def strip_accents(text: str) -> str:
+    decomposed = unicodedata.normalize("NFD", text)
+    return "".join(c for c in decomposed if unicodedata.category(c) != "Mn").lower()
+
+
+def content_hit_at_k(results: list[dict], handle: str, must_contain: str, k: int) -> bool:
+    needle = strip_accents(must_contain)
+    for row in results[:k]:
+        if row.get("handle") == handle and needle in strip_accents(row.get("content", "")):
+            return True
+    return False
 
 
 def dedupe_keep_order(items: Iterable[str]) -> list[str]:

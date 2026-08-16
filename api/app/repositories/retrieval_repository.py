@@ -7,7 +7,7 @@ async def search(embedding: list[float], k: int = 5) -> list[dict]:
     pool = await get_pool()
     rows = await pool.fetch(
         """
-        SELECT t.title, t.author, t.year, t.handle, c.content,
+        SELECT c.id, t.title, t.author, t.year, t.handle, c.content,
                1 - (c.embedding <=> $1) AS score
         FROM chunk c
         JOIN thesis t ON t.uuid = c.thesis_uuid
@@ -45,7 +45,7 @@ async def hybrid_search(
             FROM (SELECT id, rank FROM vec UNION ALL SELECT id, rank FROM txt) ranked
             GROUP BY id
         )
-        SELECT t.title, t.author, t.year, t.handle, c.content,
+        SELECT c.id, t.title, t.author, t.year, t.handle, c.content,
                f.score AS score,
                1 - (c.embedding <=> $2) AS cosine
         FROM fused f

@@ -57,9 +57,18 @@ Eval (gold de 14 preguntas de tema, nivel tesis):
 
 **Trade-off medido:** recall@1 bajó 0.952 → 0.810. Con 16x más contenido entra ruido en la posición #1 (otra tesis menciona el tema de pasada). recall@3 se mantiene en 1.000: la tesis correcta sigue en el top-3, que es lo que consume el LLM. Se ganó capacidad de responder contenido (probado en LEXBOT: query "APIs de OpenAI/DeepSeek" ahora recupera el chunk del cuerpo) a cambio de algo de precisión en el #1 a nivel tesis.
 
-### Pendiente (el gold ya se quedó corto)
+## 2026-08-16 — eval de contenido (nivel pasaje)
 
-1. **Evolucionar el gold a contenido, no tema.** Las 14 preguntas actuales apuntan a "qué tesis trata de X" (por eso recall@3 es 1.0). Ahora que hay cuerpo, el valor real está en preguntas de contenido ("qué método usó la tesis Y", "qué herramientas integró Z") y en medir **a nivel chunk**, lo que exige exponer `c.id` en `retrieval_repository` (hoy solo da `handle`).
+Nuevo instrumento: `dataset_content.py` (6 preguntas de contenido con el pasaje esperado), `metrics.content_hit_at_k` (verifica que un chunk de la tesis correcta contiene la respuesta, accent-insensitive, robusto a re-ingestas), `run_content.py`. `c.id` ahora expuesto en `retrieval_repository`.
+
+| retriever    | content-hit@1 | @3    | @5    |
+|--------------|---------------|-------|-------|
+| vector-only  | 0.667         | 0.833 | 1.000 |
+| hybrid-rrf   | 0.833         | 1.000 | 1.000 |
+
+**Insight:** con preguntas de contenido el híbrido **supera claramente** al vector (hit@1 0.83 vs 0.67, hit@3 1.0 vs 0.83). El gold de tema no lo mostraba (ahí eran idénticos porque la respuesta estaba en el título). Esto justifica con datos el `hybrid_search` + el fix `unaccent`: aportan justo donde importa, en recuperar el pasaje correcto del cuerpo. El pasaje que responde está en el top-3 del híbrido el 100% de las veces.
+
+### Pendiente
 2. **Cobertura:** 66% del corpus sin texto. Si importa, evaluar OCR de los PDFs escaneados (costo aparte) o marcar esas tesis como "solo metadata" en la UI.
 3. **Precisión@1:** si el #1 exacto importa para el producto, un reranker (M3) sobre el top-k recuperaría la precisión perdida sin sacrificar el recall de contenido.
 2. **Corregir el curso M2:** afirmaba "probablemente no hay índice ANN"; la BD sí tiene `chunk_embedding_idx` HNSW. Ajustar el material publicado.
