@@ -43,8 +43,24 @@ Prueba end-to-end con LEXBOT (`ucordoba/9727`):
 
 Validado el salto "encuentra la tesis" → "responde su contenido". Falta correr la ingesta completa (271 tesis) y medir cuántas caen en fallback (PDF sin bundle TEXT / sin OCR).
 
-### Pendiente
+## 2026-08-16 — ingesta full-text completa (271 tesis)
 
-1. **Correr ingesta full-text de las 271** (dependencia externa: servidor DSpace de la universidad). Medir % en fallback y el nº total de chunks. Luego re-medir el eval con preguntas de contenido, no solo de tema.
+- **9392 chunks** (de 575), promedio **34.7 por tesis** (de 2.12).
+- **93 tesis con texto completo, 178 en fallback (66%)**: sus PDFs no tienen bundle TEXT usable en DSpace (escaneados sin OCR). Es el techo real de cobertura de contenido del corpus.
+
+Eval (gold de 14 preguntas de tema, nivel tesis):
+
+| retriever    | recall@1 | recall@3 | recall@5 | MRR   |
+|--------------|----------|----------|----------|-------|
+| solo metadata| 0.952    | 1.000    | 1.000    | 1.000 |
+| full-text    | 0.810    | 1.000    | 1.000    | 0.917 |
+
+**Trade-off medido:** recall@1 bajó 0.952 → 0.810. Con 16x más contenido entra ruido en la posición #1 (otra tesis menciona el tema de pasada). recall@3 se mantiene en 1.000: la tesis correcta sigue en el top-3, que es lo que consume el LLM. Se ganó capacidad de responder contenido (probado en LEXBOT: query "APIs de OpenAI/DeepSeek" ahora recupera el chunk del cuerpo) a cambio de algo de precisión en el #1 a nivel tesis.
+
+### Pendiente (el gold ya se quedó corto)
+
+1. **Evolucionar el gold a contenido, no tema.** Las 14 preguntas actuales apuntan a "qué tesis trata de X" (por eso recall@3 es 1.0). Ahora que hay cuerpo, el valor real está en preguntas de contenido ("qué método usó la tesis Y", "qué herramientas integró Z") y en medir **a nivel chunk**, lo que exige exponer `c.id` en `retrieval_repository` (hoy solo da `handle`).
+2. **Cobertura:** 66% del corpus sin texto. Si importa, evaluar OCR de los PDFs escaneados (costo aparte) o marcar esas tesis como "solo metadata" en la UI.
+3. **Precisión@1:** si el #1 exacto importa para el producto, un reranker (M3) sobre el top-k recuperaría la precisión perdida sin sacrificar el recall de contenido.
 2. **Corregir el curso M2:** afirmaba "probablemente no hay índice ANN"; la BD sí tiene `chunk_embedding_idx` HNSW. Ajustar el material publicado.
 3. **Expandir el gold** a 50+ preguntas (con tildes y sin, términos exactos) para medición más robusta.
