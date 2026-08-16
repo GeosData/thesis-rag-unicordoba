@@ -68,6 +68,16 @@ Nuevo instrumento: `dataset_content.py` (6 preguntas de contenido con el pasaje 
 
 **Insight:** con preguntas de contenido el híbrido **supera claramente** al vector (hit@1 0.83 vs 0.67, hit@3 1.0 vs 0.83). El gold de tema no lo mostraba (ahí eran idénticos porque la respuesta estaba en el título). Esto justifica con datos el `hybrid_search` + el fix `unaccent`: aportan justo donde importa, en recuperar el pasaje correcto del cuerpo. El pasaje que responde está en el top-3 del híbrido el 100% de las veces.
 
+## 2026-08-16 — faithfulness (¿alucina?)
+
+`run_faith.py`: corre el grafo completo (retrieve→grade→generate contra el gateway LLM) sobre las 6 preguntas de contenido, y un juez LLM descompone cada respuesta en afirmaciones y verifica cuántas soporta el contexto.
+
+- **mean faithfulness = 1.000** sobre 6 respuestas grounded (ninguna cayó en fallback). Las respuestas son correctas y ancladas en los pasajes.
+
+**Límites honestos (no vender el 1.0 como perfecto):**
+1. **Self-judging bias:** el juez es el mismo modelo (llama-3.3-70b) que genera. Un modelo juzgándose tiende a ser indulgente; el 1.0 hay que **confirmarlo con un juez independiente más fuerte** (ej. Claude/GPT-4) antes de creerlo.
+2. **Set chico y fácil:** 6 preguntas, todas con respuesta clara en el corpus. Falta el caso duro: preguntas cuyo contexto NO tiene la respuesta, para probar que el sistema **rechaza** (fallback) en vez de inventar. El `grade` node (umbral cosine 0.35) es lo que debería atraparlas — sin medir.
+
 ### Pendiente
 2. **Cobertura:** 66% del corpus sin texto. Si importa, evaluar OCR de los PDFs escaneados (costo aparte) o marcar esas tesis como "solo metadata" en la UI.
 3. **Precisión@1:** si el #1 exacto importa para el producto, un reranker (M3) sobre el top-k recuperaría la precisión perdida sin sacrificar el recall de contenido.
