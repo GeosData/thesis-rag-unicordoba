@@ -34,10 +34,10 @@ async def hybrid_search(
         ),
         txt AS (
             SELECT id, row_number() OVER (
-                ORDER BY ts_rank(tsv, websearch_to_tsquery('spanish', $1)) DESC
+                ORDER BY ts_rank(tsv, websearch_to_tsquery('spanish_unaccent', $1)) DESC
             ) AS rank
             FROM chunk
-            WHERE tsv @@ websearch_to_tsquery('spanish', $1)
+            WHERE tsv @@ websearch_to_tsquery('spanish_unaccent', $1)
             LIMIT $4
         ),
         fused AS (
