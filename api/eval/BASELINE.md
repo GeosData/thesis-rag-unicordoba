@@ -125,6 +125,24 @@ La alucinación de Marte desapareció (ahora `grounded=False` → fallback). El 
 2. **El grade-by-LLM cuesta el 47% del wall time total.** Es el precio medido de la robustez anti-alucinación: se eliminó la alucinación casi duplicando la latencia. Palanca de mejora: un modelo más pequeño/rápido solo para el sí/no del grade recuperaría latencia sin perder la defensa.
 3. **Costo:** generate envía ~5600 chars (~1400 tokens) de contexto por query (el top-k completo). Bajar `retrieval_top_k` o recortar los chunks reduciría costo — a medir contra faithfulness.
 
+## 2026-08-16 — carga y concurrencia (pregunta 5)
+
+`run_load.py`: retrieval local (embed+search, LLM excluido a propósito) a concurrencia 1/5/10/20.
+
+| concurrencia | wall ms | throughput q/s | ms/query |
+|--------------|---------|----------------|----------|
+| 1            | 156     | 6.4            | 156      |
+| 5            | 1862    | 2.7            | 372      |
+| 10           | 433     | 23.1           | 43       |
+| 20           | 750     | 26.7           | 37       |
+
+**Honestidad sobre la medición: es ruidosa y no concluyente por sí sola** (una corrida, sin repeticiones ni warmup del pool). Lo que se puede afirmar:
+1. **El throughput escala con concurrencia (6→27 q/s):** el `retrieve` es I/O a Neon (DB remota) y el async lo solapa bien. El embed local (~10ms) NO es el cuello — la trampa del GIL de M5 no aplica aquí porque el embed es chico frente a la latencia de red.
+2. **Hipótesis del outlier en c=5 (1862ms):** el pool es `min_size=1`; a c=5 tiene que abrir 4 conexiones nuevas a Neon (handshake cold), a c=10/20 ya están warm. Si se confirma, el fix es subir `min_size` para pre-abrir conexiones y no pagar el establecimiento en el primer pico de carga.
+3. **A nivel sistema completo, el cuello bajo carga sería el LLM externo** (grade+generate, 47%+ del tiempo, sujeto a la quota del gateway), no el retrieval local.
+
+Pendiente para rigor: repetir N veces, warmup del pool, aislar embed vs retrieve, y probar `min_size` mayor para validar la hipótesis 2.
+
 ### Pendiente
 2. **Cobertura:** 66% del corpus sin texto. Si importa, evaluar OCR de los PDFs escaneados (costo aparte) o marcar esas tesis como "solo metadata" en la UI.
 3. **Precisión@1:** si el #1 exacto importa para el producto, un reranker (M3) sobre el top-k recuperaría la precisión perdida sin sacrificar el recall de contenido.
