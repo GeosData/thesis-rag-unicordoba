@@ -76,7 +76,19 @@ Nuevo instrumento: `dataset_content.py` (6 preguntas de contenido con el pasaje 
 
 **Límites honestos (no vender el 1.0 como perfecto):**
 1. **Self-judging bias:** el juez es el mismo modelo (llama-3.3-70b) que genera. Un modelo juzgándose tiende a ser indulgente; el 1.0 hay que **confirmarlo con un juez independiente más fuerte** (ej. Claude/GPT-4) antes de creerlo.
-2. **Set chico y fácil:** 6 preguntas, todas con respuesta clara en el corpus. Falta el caso duro: preguntas cuyo contexto NO tiene la respuesta, para probar que el sistema **rechaza** (fallback) en vez de inventar. El `grade` node (umbral cosine 0.35) es lo que debería atraparlas — sin medir.
+2. **Set chico y fácil:** 6 preguntas, todas con respuesta clara en el corpus. El caso duro (preguntas sin respuesta en el corpus) se mide abajo.
+
+## 2026-08-16 — adversarial (¿rechaza o inventa?)
+
+`run_adversarial.py`: 6 preguntas cuya respuesta NO está en el corpus (Marte, paella, mundial 86, submarinos, trading cripto, reserva de vuelos). Mide si el sistema hace fallback o alucina.
+
+- **refusal rate: 5/6 = 0.833.** Una alucinación real: *"cuál es la distancia de la Tierra a Marte"* → el LLM respondió "56 a 401 millones de km" con conocimiento propio, no del corpus.
+
+**Hallazgos (los adversariales rompieron dos cosas):**
+1. **El `grade` node no filtra nada.** Las 6 dieron `grounded=True` con `best_cosine` 0.44–0.63, todas sobre el umbral `relevance_min_score=0.35`. Con el modelo de embeddings multilingüe, hasta preguntas totalmente ajenas puntúan alto en coseno; el umbral 0.35 nunca discrimina. El nodo es decorativo.
+2. **La defensa anti-alucinación real es el prompt, no la arquitectura.** Los 5 rechazos vienen de la instrucción "si el contexto no alcanza, dilo" en `generate`, no del `grade`. Es frágil: depende del LLM. Marte se le escapó porque es un hecho tan común que el modelo lo suelta sin dudar — patrón típico: los hechos generales muy conocidos escapan al grounding.
+
+**Fix identificado:** recalibrar el `grade` (el umbral cosine no sirve; probar el score RRF, un margen relativo, o un grade basado en LLM) para atrapar out-of-domain antes de `generate`, en vez de confiar en que el prompt aguante.
 
 ### Pendiente
 2. **Cobertura:** 66% del corpus sin texto. Si importa, evaluar OCR de los PDFs escaneados (costo aparte) o marcar esas tesis como "solo metadata" en la UI.
