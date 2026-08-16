@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str | None = None
     corpus_path: str = ""
+    dspace_api_base: str = "https://repositorio.unicordoba.edu.co/server/api"
+    fulltext_cache: str = ".cache/fulltext"
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     fastembed_cache: str | None = None
     groq_api_key: str | None = None

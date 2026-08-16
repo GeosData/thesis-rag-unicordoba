@@ -13,6 +13,14 @@ def build_document(item: dict) -> str:
     return "\n".join(part.strip() for part in parts if part and part.strip())
 
 
+def build_chunks(item: dict, fulltext: str | None) -> list[str]:
+    metadata = build_document(item)
+    chunks: list[str] = [metadata] if metadata else []
+    if fulltext:
+        chunks.extend(chunk_text(fulltext))
+    return chunks
+
+
 def chunk_text(text: str, size: int = 1000, overlap: int = 150) -> list[str]:
     if len(text) <= size:
         return [text]

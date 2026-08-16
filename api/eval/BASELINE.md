@@ -32,8 +32,19 @@ Aplicado: extensión `unaccent` + config de búsqueda `spanish_unaccent` (normal
 
 Este es el primer antes/después de mejora medida: material directo para el design doc y el post del capstone.
 
+## 2026-08-16 — texto completo (prueba de 1 tesis)
+
+Pipeline nuevo: `services/fulltext.py` resuelve el bundle TEXT de DSpace por uuid (con cache y fallback a metadata), `corpus.build_chunks` arma cuerpo + un chunk de metadata, `ingest.py` lo usa y cuenta fallbacks.
+
+Prueba end-to-end con LEXBOT (`ucordoba/9727`):
+- **2 → 107 chunks** (89.653 chars de texto completo).
+- Query de contenido *"qué proveedores de IA usó LexBot"* → recupera el chunk del cuerpo con "OpenAI y DeepSeek". Antes imposible (solo abstract indexado).
+- Eval global tras la prueba: recall@1 0.881 → **0.952**, recall@3 → **1.000**, MRR → **1.000**. Cuerpo+metadata mejoró sin romper la búsqueda por tema.
+
+Validado el salto "encuentra la tesis" → "responde su contenido". Falta correr la ingesta completa (271 tesis) y medir cuántas caen en fallback (PDF sin bundle TEXT / sin OCR).
+
 ### Pendiente
 
-1. **Estructural (el techo real):** 2.12 chunks/tesis, 73 tesis con un solo chunk. El corpus es casi solo título + resumen; el RAG encuentra la tesis pero no responde su contenido. Decidir si se ingiere el texto completo (subir el nº de chunks).
+1. **Correr ingesta full-text de las 271** (dependencia externa: servidor DSpace de la universidad). Medir % en fallback y el nº total de chunks. Luego re-medir el eval con preguntas de contenido, no solo de tema.
 2. **Corregir el curso M2:** afirmaba "probablemente no hay índice ANN"; la BD sí tiene `chunk_embedding_idx` HNSW. Ajustar el material publicado.
 3. **Expandir el gold** a 50+ preguntas (con tildes y sin, términos exactos) para medición más robusta.
