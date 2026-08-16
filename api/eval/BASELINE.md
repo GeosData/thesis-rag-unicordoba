@@ -106,6 +106,25 @@ La alucinación de Marte desapareció (ahora `grounded=False` → fallback). El 
 
 **Trade-off honesto:** agrega una llamada LLM por query (el grade ya no es instantáneo). Cada consulta hace ahora 1 llamada (si rechaza) o 2 (grade + generate). Es el costo de la robustez; el impacto en latencia/costo se cuantifica en la pregunta 3 del capstone (pendiente).
 
+## 2026-08-16 — latencia por etapa y costo (pregunta 3)
+
+`run_latency.py`: perfila cada etapa (embed → retrieve → grade → generate) sobre 12 queries (6 content + 6 adversariales; 6 llegan a generate, 6 se rechazan en grade).
+
+| etapa    | p50 ms | p95 ms | mean ms |
+|----------|--------|--------|---------|
+| embed    | 10     | 3194*  | 276     |
+| retrieve | 156    | 309    | 170     |
+| grade    | 278    | 3118   | 515     |
+| generate | 269    | 413    | 291     |
+| total    | 569    | 7033   | 1106    |
+
+*el p95 de embed es el cold-start del modelo fastembed en la primera query (carga en memoria); en régimen es ~10ms.
+
+**Hallazgos:**
+1. **El cuello es el LLM, no el retrieval:** grade+generate (~547ms p50) vs embed+retrieve (~166ms). Optimizar el retrieval movería poco; el tiempo está en las llamadas al modelo.
+2. **El grade-by-LLM cuesta el 47% del wall time total.** Es el precio medido de la robustez anti-alucinación: se eliminó la alucinación casi duplicando la latencia. Palanca de mejora: un modelo más pequeño/rápido solo para el sí/no del grade recuperaría latencia sin perder la defensa.
+3. **Costo:** generate envía ~5600 chars (~1400 tokens) de contexto por query (el top-k completo). Bajar `retrieval_top_k` o recortar los chunks reduciría costo — a medir contra faithfulness.
+
 ### Pendiente
 2. **Cobertura:** 66% del corpus sin texto. Si importa, evaluar OCR de los PDFs escaneados (costo aparte) o marcar esas tesis como "solo metadata" en la UI.
 3. **Precisión@1:** si el #1 exacto importa para el producto, un reranker (M3) sobre el top-k recuperaría la precisión perdida sin sacrificar el recall de contenido.
