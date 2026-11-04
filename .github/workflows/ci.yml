@@ -5,14 +5,25 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: api
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv sync
-      - run: uv run pytest -q
+      - run: uv sync --python 3.12
+      - name: Retrieval and answer graph tests (LLM, embeddings and database stubbed)
+        run: uv run pytest -q tests/test_rag_graph.py tests/test_qa_service.py
+      - name: Full test suite
+        run: uv run pytest -q
