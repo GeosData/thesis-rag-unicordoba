@@ -12,7 +12,7 @@ class Answer(BaseModel):
 
 
 class AskRequest(BaseModel):
-    question: str
+    question: str = Field(max_length=2000)
 
 
 class AskResponse(BaseModel):
